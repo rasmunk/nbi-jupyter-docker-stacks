@@ -35,5 +35,7 @@ RUN $PYTHON2_PATH/bin/pip install \
     && fix-permissions $CONDA_DIR \
     && fix-permissions /home/$NB_USER
 
-# Run container as
-USER $NB_UID
+# As an exception, run as root,
+# Remember to use supervisord start-notebook.sh to
+# de-escalate privileges to $NB_UID:$NB_GID
+USER root
