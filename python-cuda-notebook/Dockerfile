@@ -12,6 +12,7 @@ ARG CUDA_MAJOR_VERSION=11
 ARG CUDA_MIN_VERSION=0
 ENV CUDA_VERSION=${CUDA_MAJOR_VERSION}.${CUDA_MIN_VERSION}
 ARG CUDA_PKG_VERSION=11-0
+ARG CUDA_DRIVER_VERSION=450
 
 ARG NCCL_VERSION=2.9.6
 ARG CUDNN_VERSION=8.1.1
@@ -30,17 +31,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # For libraries in the cuda-compat-* package: https://docs.nvidia.com/cuda/eula/index.html#attachment-a
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    cuda-${CUDA_PKG_VERSION} \
-    libnccl2 \
-    libnccl-dev \
-    libcudnn8 \
-    libcudnn8-dev \
+    cuda-cudart-${CUDA_PKG_VERSION}=11.0.221-1 \
+    cuda-compat-${CUDA_PKG_VERSION} \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 # Add missing symlink for libcusolver
 WORKDIR ${CUDA_PATH}/lib64
-RUN ln -s libcusolver.so.11 libcusolver.so.10
 WORKDIR /tmp
 
 ENV PATH="${CUDA_PATH}/bin:${PATH}"
@@ -59,10 +56,10 @@ RUN chown $NB_UID:$NB_GID -R /tmp
 USER $NB_UID
 
 COPY requirements.txt /tmp/
-RUN conda run -n python3 pip install -r requirements.txt \
-    && conda clean --all -f -y \
-    && fix-permissions $CONDA_DIR \
-    && fix-permissions /home/$NB_USER
+#RUN conda run -n python3 pip install -r requirements.txt \
+#    && conda clean --all -f -y \
+#    && fix-permissions $CONDA_DIR \
+#    && fix-permissions /home/$NB_USER
 
 WORKDIR /home/$NB_USER
 
