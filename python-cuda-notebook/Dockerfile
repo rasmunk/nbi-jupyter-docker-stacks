@@ -15,7 +15,7 @@ ARG CUDA_PKG_VERSION=11-0
 ARG CUDA_DRIVER_VERSION=450
 
 ARG NCCL_VERSION=2.9.6
-ARG CUDNN_VERSION=8.1.1
+ARG CUDNN_VERSION=8.0.5.39
 
 ENV CUDA_PATH="/usr/local/cuda"
 ENV CUDA_11_0_PATH="/usr/local/cuda-11.0"
@@ -33,6 +33,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN apt-get update && apt-get install -y --no-install-recommends \
     cuda-cudart-${CUDA_PKG_VERSION}=11.0.221-1 \
     cuda-compat-${CUDA_PKG_VERSION} \
+    cuda-libraries-11-0=11.0.3-1 \
+    libnpp-11-0=11.1.0.245-1 \
+    cuda-nvtx-11-0=11.0.167-1 \
+    libcublas-11-0=11.2.0.252-1 \
+    libcusparse-11-0=11.1.1.245-1 \
+    libnccl2=$NCCL_VERSION-1+cuda11.0 \
+    libcudnn8=$CUDNN_VERSION-1+cuda11.0 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -56,10 +63,10 @@ RUN chown $NB_UID:$NB_GID -R /tmp
 USER $NB_UID
 
 COPY requirements.txt /tmp/
-#RUN conda run -n python3 pip install -r requirements.txt \
-#    && conda clean --all -f -y \
-#    && fix-permissions $CONDA_DIR \
-#    && fix-permissions /home/$NB_USER
+RUN conda run -n python3 pip install -r requirements.txt \
+    && conda clean --all -f -y \
+    && fix-permissions $CONDA_DIR \
+    && fix-permissions /home/$NB_USER
 
 WORKDIR /home/$NB_USER
 
